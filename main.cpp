@@ -120,12 +120,12 @@ class ssl_server
 	tcp::acceptor acceptor_;
 	tcp::endpoint endpoint_;
 public:
-	ssl_server(io_service& io)
+	ssl_server(io_service& io, const std::string& server_address)
 		: io_(io)
 		, acceptor_(io_, tcp::endpoint(tcp::v4(), 5000))
 	{
 		tcp::resolver resolver(io_);
-		endpoint_ = *resolver.resolve(tcp::resolver::query("jp1.60in.com", "https"));
+		endpoint_ = *resolver.resolve(tcp::resolver::query(server_address, "https"));
 	}
 
 	void start()
@@ -147,11 +147,22 @@ public:
 };
 
 
-int main()
+void show_usage(const char* progname)
 {
+	std::cerr << "Usage:" << progname << " <server_address>";
+	exit(1);
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 2)
+	{
+		show_usage(argv[0]);
+	}
+
 	io_service io;
 
-	ssl_server server(io);
+	ssl_server server(io, argv[1]);
 	server.start();
 
 	io.run();
